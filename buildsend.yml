@@ -3,7 +3,9 @@ version: 0.2
 phases:
   install:
     commands:
-      - chmod +x stop-ec2.sh        # Make the script executable
+      - file stop-ec2.sh               # Debug info
+      - dos2unix stop-ec2.sh          # Fix line endings
+      - chmod +x stop-ec2.sh
   build:
     commands:
-      - ./stop-ec2.sh notify        # Run the script with 'notify' action
+      - ./stop-ec2.sh notify
