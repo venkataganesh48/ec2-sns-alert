@@ -1,5 +1,7 @@
 version: 0.2
+
 phases:
   build:
     commands:
+      - chmod +x stop-ec2.sh
       - ./stop-ec2.sh notify
