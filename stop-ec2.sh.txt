@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# === CONFIGURATION ===
+INSTANCE_ID="i-0e311fa5ed5d89a0c"
+SNS_TOPIC="arn:aws:sns:ap-south-1:934977584611:email-trigger"
+S3_BUCKET="ec2-approval-saiganesh8078"
+FILE_NAME="approval.txt"
+REGION="ap-south-1"
+TMP_FILE="/tmp/$FILE_NAME"
+
+# === STEP 1: Delete any existing approval file in S3 ===
+echo "🚮 Deleting old approval file from S3..."
+aws s3 rm "s3://$S3_BUCKET/$FILE_NAME" --region "$REGION" > /dev/null 2>&1
+
+# === STEP 2: Send approval request ===
+MESSAGE="🛑 Request to stop EC2 instance: $INSTANCE_ID
+
+To approve or deny this request, please:
+1. Upload a file named '$FILE_NAME' to S3 bucket: $S3_BUCKET
+2. File content must be:
+   yes — to approve shutdown
+   no  — to deny shutdown"
+
+echo "📤 Sending approval email via SNS..."
+aws sns publish \
+  --topic-arn "$SNS_TOPIC" \
+  --subject "Approval Required: Stop EC2 $INSTANCE_ID" \
+  --message "$MESSAGE" \
+  --region "$REGION"
+
+echo "⏳ Waiting for file upload to S3 bucket: $S3_BUCKET"
+
+# === STEP 3: Wait up to 6 minutes for file upload ===
+for i in {1..12}; do
+  if aws s3 ls "s3://$S3_BUCKET/$FILE_NAME" --region "$REGION" > /dev/null 2>&1; then
+    echo "📥 Detected $FILE_NAME in S3. Downloading..."
+    aws s3 cp "s3://$S3_BUCKET/$FILE_NAME" "$TMP_FILE" --region "$REGION"
+
+    DECISION=$(cat "$TMP_FILE" | tr -d '\r' | tr '[:upper:]' '[:lower:]' | xargs)
+
+    if [[ "$DECISION" == "yes" ]]; then
+      echo "✅ Approval received. Proceeding to stop instance: $INSTANCE_ID"
+      aws ec2 stop-instances --instance-ids "$INSTANCE_ID" --region "$REGION"
+    elif [[ "$DECISION" == "no" ]]; then
+      echo "❌ Shutdown denied. Instance will continue running."
+    else
+      echo "⚠ Invalid content in approval file: '$DECISION'. Expected 'yes' or 'no'."
+    fi
+
+    # Cleanup
+    rm -f "$TMP_FILE"
+    exit 0
+  else
+    echo "⌛ Waiting for approval file... (${i}/12)"
+    sleep 30
+  fi
+done
+
+echo "⏰ Timeout: No approval file uploaded in 6 minutes. Instance will continue running."

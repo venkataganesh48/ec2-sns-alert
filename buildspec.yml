@@ -1,0 +1,9 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo "🔧 Installing jq and AWS CLI tools (if not available)..."
+      - yum install -y jq || true
+      - chmod +x stop-ec2.sh
+      - ./stop-ec2.sh
