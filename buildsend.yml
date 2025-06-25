@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     commands:
-      - chmod +x ec2-action.sh        # Make the script executable
+      - chmod +x stop-ec2.sh        # Make the script executable
   build:
     commands:
-      - ./ec2-action.sh notify        # Run the script with 'notify' action
+      - ./stop-ec2.sh notify        # Run the script with 'notify' action
