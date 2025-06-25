@@ -4,7 +4,7 @@ ACTION=$1  # notify or stop
 
 # Configuration
 INSTANCE_ID="i-0e311fa5ed5d89a0c"
-TOPIC_ARN="arn:aws:sns:ap-south-1:934977584611:ec2-approval"
+TOPIC_ARN="arn:aws:sns:ap-south-1:934977584611:new-test-cp"
 REGION="ap-south-1"
 
 if [ "$ACTION" == "notify" ]; then
