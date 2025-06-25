@@ -2,4 +2,4 @@ version: 0.2
 phases:
   build:
     commands:
-      - ./script.sh notify
+      - ./stop-ec2.sh notify
