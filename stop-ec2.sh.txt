@@ -3,8 +3,8 @@
 ACTION=$1  # notify or stop
 
 # Configuration
-INSTANCE_ID="i-0cc2a03553d181551"
-TOPIC_ARN="arn:aws:sns:ap-south-1:458799594567:ec2-alert-testing"
+INSTANCE_ID="i-0e311fa5ed5d89a0c"
+TOPIC_ARN="arn:aws:sns:ap-south-1:934977584611:ec2-approval"
 REGION="ap-south-1"
 
 if [ "$ACTION" == "notify" ]; then
